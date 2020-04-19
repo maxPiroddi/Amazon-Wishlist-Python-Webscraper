@@ -2,6 +2,8 @@ import requests
 from bs4 import BeautifulSoup
 import smtplib
 import time
+import os
+
 SECONDS_IN_DAY = 86400
 URL = 'https://www.amazon.com.au/Nintendo-Switch-Console-Lite-Turquoise/dp/B07V8MLT39/'
 headers = {
@@ -26,9 +28,9 @@ def send_email():
     server.starttls()
     server.ehlo()
 
-    login_email = ''
-    login_password = ''
-    recipient_email = ''
+    login_email = os.environ.get('EMAIL_USER')
+    login_password = os.environ.get('EMAIL_KEY')
+    recipient_email = os.environ.get('EMAIL_RECIPIENT')
 
     server.login(login_email, login_password)
 
