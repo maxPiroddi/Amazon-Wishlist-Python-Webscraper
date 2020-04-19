@@ -3,23 +3,42 @@ from bs4 import BeautifulSoup
 import smtplib
 import time
 import os
+import json
 
 SECONDS_IN_DAY = 86400
-URL = 'https://www.amazon.com.au/Nintendo-Switch-Console-Lite-Turquoise/dp/B07V8MLT39/'
-headers = {
-    "User-Agent": 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.163 Safari/537.36'}
+URL_LIST = [
+    'https://www.amazon.com.au/Nintendo-Switch-Console-Lite-Turquoise/dp/B07V8MLT39/',
+    'https://www.amazon.com.au/Animal-Crossing-New-Horizons-Nintendo/dp/B083TYVJ22',
+    'https://www.amazon.com.au/Legend-Zelda-Breath-Wild/dp/B076P6K4YT',
+    'https://www.amazon.com.au/Nintendo-Switch-Neon-Blue-Joy/dp/B01MUAGZ49',
+]
 
+headers = {
+    "User-Agent": os.environ.get('USER_AGENT')}
+
+PRICE_LIST = []
 
 def check_price():
-    page = requests.get(URL, headers=headers)
-    soup = BeautifulSoup(page.content, 'html.parser')
+    for URL in URL_LIST:
+        page = requests.get(URL, headers=headers)
+        soup = BeautifulSoup(page.content, 'html.parser')
 
-    title = soup.find(id="productTitle").get_text().strip()
-    price = soup.find(id="priceblock_ourprice").get_text()
-    converted_price = float(price[1:7])
+        title = soup.find(id="productTitle").get_text().strip()
+        price = soup.find(id="priceblock_ourprice")
+        if(price != None):
+            price = price.get_text()
+            price = float(price[1:7])
+        else:
+            price = 'Out of stock'
 
-    if(converted_price < 350):
-        send_email()
+        image = soup.find(id="imgTagWrapperId").findChildren(
+            'img', recursive=False)[0]['data-a-dynamic-image']
+        img_load = json.loads(image)
+        img_src = list(img_load.keys())[0]
+        pricelist_item = {'title': title, 'price': price, 'img': img_src, 'url': URL}
+
+        PRICE_LIST.append(pricelist_item)
+        print(PRICE_LIST)
 
 
 def send_email():
@@ -48,6 +67,7 @@ def send_email():
     print('Email has been sent.')
     server.quit()
 
-while(True):
-    check_price()
-    time.sleep(SECONDS_IN_DAY)
+
+# while(True):
+check_price()
+# time.sleep(SECONDS_IN_DAY)
