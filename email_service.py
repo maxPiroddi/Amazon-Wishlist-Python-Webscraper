@@ -3,7 +3,6 @@ import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 
-
 def send_email(PRICE_LIST):
     server = smtplib.SMTP('smtp.gmail.com', 587)
     server.ehlo()
@@ -34,18 +33,10 @@ def send_email(PRICE_LIST):
 def format_data(PRICE_LIST):
     htmlpush = ""
     for item in PRICE_LIST:
-        header = f"<h3>{item['title']}</h3>"
-        img = f"<img src={item['img']} />"
-        price = f"<p>{item['price']}</p>"
-        url = f"<p>{item['url']}</p>"
-        linebreak = "<br />"
-        htmlpush = htmlpush + header + img + price + url + linebreak
-    html = f"""\
-            <html>
-            <head></head>
-            <body>
-                {htmlpush}
-            </body>
-            </html>
-        """
+        header = f"{item['title']}\n"
+        price = f"Price: {item['price']}\n"
+        url = f"Link: {item['url']}\n"
+        linebreak = "\n"
+        htmlpush = htmlpush + header + price + url + linebreak
+    html = htmlpush.encode()
     return html
